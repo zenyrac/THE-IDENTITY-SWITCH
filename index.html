@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE BLACK BOOK™ TO FAME</title>
+    <style>
+        :root {
+            --primary: #ff4d00;
+            --secondary: #00ffcc;
+            --dark: #121212;
+            --darker: #0a0a0a;
+            --light: #e0e0e0;
+            --error: #ff3333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 2rem;
+            transition: all 0.5s ease;
+        }
+        
+        /* Passcode Screen */
+        .passcode-screen {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+        
+        .passcode-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .passcode-input {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .passcode-input input {
+            width: 60px;
+            height: 70px;
+            font-size: 2rem;
+            text-align: center;
+            background-color: var(--darker);
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: var(--light);
+            transition: all 0.3s ease;
+        }
+        
+        .passcode-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(255, 77, 0, 0.3);
+        }
+        
+        .error-message {
+            color: var(--error);
+            height: 20px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .error-message.show {
+            opacity: 1;
+        }
+        
+        /* Audio Player */
+        .audio-player {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--darker);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+        }
+        
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .player-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        
+        .audio-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .audio-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .meta-label {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        .audio-title-container {
+            display: flex;
+            gap: 0.5rem;
+            align-items: baseline;
+            margin-bottom: 0.5rem;
+        }
+        
+        .title-label {
+            color: var(--secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .audio-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--light);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+            width: 0%;
+            position: relative;
+            transition: width 0.1s linear;
+        }
+        
+        .progress-handle {
+            width: 16px;
+            height: 16px;
+            background-color: var(--light);
+            border-radius: 50%;
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .progress-container:hover .progress-handle {
+            opacity: 1;
+        }
+        
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .main-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .play-btn i {
+            color: var(--darker);
+            font-size: 1.8rem;
+            margin-left: 5px;
+        }
+        
+        .skip-btns {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .skip-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        
+        .skip-btn:hover {
+            opacity: 1;
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        .speed-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .speed-btn.active {
+            background-color: var(--primary);
+            color: var(--darker);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .volume-slider {
+            width: 100px;
+            height: 4px;
+            -webkit-appearance: none;
+            background-color: #333;
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background-color: var(--light);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        /* Completion Overlay */
+        .completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .completion-message {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .completion-submessage {
+            font-size: 1.2rem;
+            color: var(--light);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #555;
+            font-size: 0.8rem;
+            border-top: 1px solid #222;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .passcode-input input {
+                width: 50px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .audio-player {
+                padding: 1.5rem;
+            }
+            
+            .player-title {
+                font-size: 1.5rem;
+            }
+            
+            .audio-title {
+                font-size: 1rem;
+            }
+            
+            .play-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .main-controls {
+                gap: 1rem;
+            }
+            
+            .completion-message {
+                font-size: 1.8rem;
+            }
+            
+            .completion-submessage {
+                font-size: 1rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="passcode-screen" id="passcodeScreen">
+            <div class="logo">THE BLACK BOOK™ TO FAME</div>
+            <div class="passcode-form">
+                <div class="passcode-input">
+                    <input type="text" maxlength="1" data-index="0" autofocus>
+                    <input type="text" maxlength="1" data-index="1">
+                    <input type="text" maxlength="1" data-index="2">
+                    <input type="text" maxlength="1" data-index="3">
+                </div>
+                <div class="error-message" id="errorMessage">Incorrect passcode. Try again.</div>
+            </div>
+        </div>
+        
+        <div class="audio-player" id="audioPlayer">
+            <div class="player-header">
+                <div class="player-title">THE BLACK BOOK™ TO FAME</div>
+            </div>
+            
+            <div class="audio-info">
+                <div class="audio-title-container">
+                    <span class="title-label">Title:</span>
+                    <span class="audio-title">How To Change Your Life By Making An Identity Switch</span>
+                </div>
+                
+                <div class="audio-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Author:</span>
+                        <span>April Mason</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Produced:</span>
+                        <span id="currentDate">Loading...</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Opened at:</span>
+                        <span id="openedTime">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-handle"></div>
+                </div>
+            </div>
+            <div class="time-display">
+                <span id="currentTime">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            
+            <div class="controls">
+                <div class="main-controls">
+                    <div class="skip-btns">
+                        <button class="skip-btn" id="skipBackward"><i class="fas fa-backward"></i></button>
+                    </div>
+                    <button class="play-btn" id="playBtn">
+                        <i class="fas fa-play" id="playIcon"></i>
+                    </button>
+                    <div class="skip-btns">
+                        <button class="skip-btn" id="skipForward"><i class="fas fa-forward"></i></button>
+                    </div>
+                </div>
+                
+                <div class="speed-control">
+                    <button class="speed-btn active" data-speed="1">1x</button>
+                    <button class="speed-btn" data-speed="1.5">1.5x</button>
+                    <button class="speed-btn" data-speed="2">2x</button>
+                </div>
+                
+                <div class="volume-control">
+                    <i class="fas fa-volume-up" id="volumeIcon"></i>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Completion Overlay -->
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-message">YOU'VE COMPLETED THE FIRST TASK OF 6</div>
+        <div class="completion-submessage">You're transforming your level, page by page, task by task!</div>
+    </div>
+    
+    <footer>
+        ALL RIGHTS RESERVED. THE BLACK BOOK™. COPYRIGHTED FROM 2015-2025.
+    </footer>
+    
+    <audio id="audioElement" src="Identity Switching How To Change Your Life By Making An Identity Switch April Mason TEDxWeston [GuQ4d4KDeBk].mp3"></audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date and time
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+            
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+            document.getElementById('openedTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+            
+            // Passcode functionality
+            const passcode = '1947';
+            const passcodeInputs = document.querySelectorAll('.passcode-input input');
+            const errorMessage = document.getElementById('errorMessage');
+            const passcodeScreen = document.getElementById('passcodeScreen');
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            // Auto-focus and auto-tab between passcode inputs
+            passcodeInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    
+                    // Only allow numbers
+                    if (isNaN(value)) {
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    // Auto-focus next input
+                    if (value.length === 1 && index < passcodeInputs.length - 1) {
+                        passcodeInputs[index + 1].focus();
+                    }
+                    
+                    // Check passcode when all inputs are filled
+                    if (index === passcodeInputs.length - 1 && value.length === 1) {
+                        checkPasscode();
+                    }
+                });
+                
+                // Handle backspace
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && input.value.length === 0 && index > 0) {
+                        passcodeInputs[index - 1].focus();
+                    }
+                });
+            });
+            
+            function checkPasscode() {
+                let enteredPasscode = '';
+                passcodeInputs.forEach(input => {
+                    enteredPasscode += input.value;
+                });
+                
+                if (enteredPasscode === passcode) {
+                    // Correct passcode
+                    passcodeScreen.classList.add('fade-in');
+                    setTimeout(() => {
+                        passcodeScreen.style.display = 'none';
+                        audioPlayer.style.display = 'flex';
+                        audioPlayer.classList.add('fade-in');
+                        initializeAudioPlayer();
+                    }, 500);
+                } else {
+                    // Incorrect passcode
+                    errorMessage.classList.add('show');
+                    passcodeInputs.forEach(input => {
+                        input.value = '';
+                        input.style.borderColor = 'var(--error)';
+                    });
+                    passcodeInputs[0].focus();
+                    
+                    setTimeout(() => {
+                        errorMessage.classList.remove('show');
+                        passcodeInputs.forEach(input => {
+                            input.style.borderColor = '#333';
+                        });
+                    }, 2000);
+                }
+            }
+            
+            // Audio Player functionality
+            function initializeAudioPlayer() {
+                const audioElement = document.getElementById('audioElement');
+                const playBtn = document.getElementById('playBtn');
+                const playIcon = document.getElementById('playIcon');
+                const progressBar = document.getElementById('progressBar');
+                const progressContainer = document.getElementById('progressContainer');
+                const currentTimeEl = document.getElementById('currentTime');
+                const durationEl = document.getElementById('duration');
+                const skipForwardBtn = document.getElementById('skipForward');
+                const skipBackwardBtn = document.getElementById('skipBackward');
+                const speedBtns = document.querySelectorAll('.speed-btn');
+                const volumeSlider = document.getElementById('volumeSlider');
+                const volumeIcon = document.getElementById('volumeIcon');
+                const completionOverlay = document.getElementById('completionOverlay');
+                
+                // Play/Pause
+                playBtn.addEventListener('click', () => {
+                    if (audioElement.paused) {
+                        audioElement.play();
+                        playIcon.classList.remove('fa-play');
+                        playIcon.classList.add('fa-pause');
+                    } else {
+                        audioElement.pause();
+                        playIcon.classList.remove('fa-pause');
+                        playIcon.classList.add('fa-play');
+                    }
+                });
+                
+                // Update progress bar
+                audioElement.addEventListener('timeupdate', () => {
+                    const { currentTime, duration } = audioElement;
+                    const progressPercent = (currentTime / duration) * 100;
+                    progressBar.style.width = `${progressPercent}%`;
+                    
+                    // Update time display
+                    currentTimeEl.textContent = formatTime(currentTime);
+                    
+                    if (duration) {
+                        durationEl.textContent = formatTime(duration);
+                    }
+                });
+                
+                // Set progress
+                progressContainer.addEventListener('click', (e) => {
+                    const width = progressContainer.clientWidth;
+                    const clickX = e.offsetX;
+                    const duration = audioElement.duration;
+                    audioElement.currentTime = (clickX / width) * duration;
+                });
+                
+                // Skip buttons
+                skipForwardBtn.addEventListener('click', () => {
+                    audioElement.currentTime += 15;
+                });
+                
+                skipBackwardBtn.addEventListener('click', () => {
+                    audioElement.currentTime -= 15;
+                });
+                
+                // Speed controls
+                speedBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        speedBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        audioElement.playbackRate = parseFloat(btn.dataset.speed);
+                    });
+                });
+                
+                // Volume control
+                volumeSlider.addEventListener('input', () => {
+                    audioElement.volume = volumeSlider.value;
+                    updateVolumeIcon();
+                });
+                
+                function updateVolumeIcon() {
+                    const volume = audioElement.volume;
+                    if (volume === 0) {
+                        volumeIcon.classList.remove('fa-volume-up', 'fa-volume-down');
+                        volumeIcon.classList.add('fa-volume-mute');
+                    } else if (volume < 0.5) {
+                        volumeIcon.classList.remove('fa-volume-up', 'fa-volume-mute');
+                        volumeIcon.classList.add('fa-volume-down');
+                    } else {
+                        volumeIcon.classList.remove('fa-volume-down', 'fa-volume-mute');
+                        volumeIcon.classList.add('fa-volume-up');
+                    }
+                }
+                
+                // Format time (mm:ss)
+                function formatTime(seconds) {
+                    const minutes = Math.floor(seconds / 60);
+                    const secs = Math.floor(seconds % 60);
+                    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+                }
+                
+                // When audio ends
+                audioElement.addEventListener('ended', () => {
+                    playIcon.classList.remove('fa-pause');
+                    playIcon.classList.add('fa-play');
+                    progressBar.style.width = '0%';
+                    currentTimeEl.textContent = '0:00';
+                    
+                    // Show completion overlay
+                    completionOverlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                // Initialize volume
+                audioElement.volume = volumeSlider.value;
+                updateVolumeIcon();
+            }
+        });
+    </script>
+</body>
+</html>
